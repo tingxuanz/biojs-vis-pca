@@ -1,10 +1,10 @@
 {
   "name": "biojs-vis-pca",
-  "description": "pca visualization component",
+  "description": "a biojs visulization component for pca",
   "version": "0.1.0",
   "homepage": "https://github.com/tingxuanz/biojs-vis-pca",
   "author": {
-    "name": "tingxuanz",
+    "name": "tingxuan zhang",
     "email": "zhangtx93@gmail.com"
   },
   "repository": {
@@ -18,10 +18,10 @@
   "main": "lib/index.js",
   "scripts": {
 		"test": "echo 'Error: no test specified' && exit 1",
-		"build": "mkdirp build && browserify -r ./:biojs-vis-pca -o build/pca.js",
+		"build": "mkdirp build && browserify -r ./:biojs-vis-pca -o build/test.js",
 		"build-browser": "npm run build",
 		"prepublish": "npm run build",
-		"watch": "watchify -r ./:biojs-vis-pca -v -o build/pca.js",
+		"watch": "watchify -r ./:biojs-vis-pca -v -o build/test.js",
 		"w": "prunner \"npm run sniper\" \"npm run watch\"",
 		"sniper": "sniper ."
   },
@@ -32,11 +32,17 @@
 		"sniper": "0.x",
 		"watchify": "^1.0.6",
 		"prunner": "1.x"
-  }, 
+  },
   "sniper": {
-    "js": [ "/build/pca.js"],
+    "js": [
+          "/build/test.js",
+          "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js",
+          "https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.3/d3-tip.min.js",
+          "https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"
+    ],
+    "css":["/css/main.css"],
     "snippets": ["examples"],
     "first": "simple"
-   }, 
-  "keywords": ["pca","biojs"]
+   },
+  "keywords": ["biojs","biojs"]
 }

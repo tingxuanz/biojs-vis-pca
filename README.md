@@ -17,9 +17,9 @@ npm install -g browserify
 npm install -g prunner
 npm install -g sniper
 ```
+Clone or download this repo
 
-
-Run
+Run the following commands in the repo's root directory
 ```
 npm run build
 npm run w

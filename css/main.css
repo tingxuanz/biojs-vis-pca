@@ -1,0 +1,29 @@
+div.tooltip{
+      @include default_large_text;
+      padding: 8px;
+      display: inline-block;
+      max-width: 300px;
+      z-index: 11000;
+      position: absolute;
+      color: #5a5a5a;
+      background-color: #FFF;
+      border: 1px solid #000;
+      display:block;
+      word-wrap: break-word;
+  }
+
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}

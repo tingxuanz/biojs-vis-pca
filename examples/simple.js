@@ -52,6 +52,43 @@ var tooltip = d3.tip()
         return temp;
     });
 
+d3.tsv("../data/demo.tsv", function(error, data) {
+      data.forEach(function(d) {
+        d.component1 = +d.component1;
+        d.component2 = +d.component2;
+      });
+
+      target = rootDiv;
+      var options = {
+        metaData: metaData,
+        circle_radius: 8,
+        data: data,
+        height: 600,
+        width: 960,
+        domain: metaData.option1,
+        domain_colors: ["blue", "red", "green"],
+        margin: {
+          top: 80,
+          right: 20,
+          bottom: 30,
+          left: 40
+        },
+        target: target,
+        tooltip: tooltip,
+        x_axis_title: "Principal Component #1",
+        y_axis_title: "Principal Component #2",
+      };
+
+      var instance = new app(options);
+
+      // Get the d3js SVG element
+      var tmp = document.getElementById(rootDiv.id);
+      var svg = tmp.getElementsByTagName("svg")[0];
+
+      // Extract the data as SVG text string
+      var svg_xml = (new XMLSerializer).serializeToString(svg);
+});
+
 function color_by_option(index){
   var chosenOption = selectList.options[index];
   var domain;

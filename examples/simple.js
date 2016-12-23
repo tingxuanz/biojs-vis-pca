@@ -1,13 +1,9 @@
 // if you don't specify a html file, the sniper will generate a div with id "rootDiv"
 var app = require("biojs-vis-pca");
-/*
-var button = document.createElement("button");
-button.innerHTML = "Do Something";
-// 2. Append somewhere
-var body = document.getElementsByTagName("body")[0];
-body.appendChild(button);
-*/
+
+//metaData contains different options
 var metaData = {"option1": ["Republican", "Democrat"], "option2": ["a", "b", "c"], "option3": ["x", "y", "z"]};
+
 var body = document.getElementsByTagName("body")[0];
 
 //Create array of options to be added
@@ -52,6 +48,7 @@ var tooltip = d3.tip()
         return temp;
     });
 
+// render the default graph, use option1 as domain
 d3.tsv("../data/demo.tsv", function(error, data) {
       data.forEach(function(d) {
         d.component1 = +d.component1;
@@ -65,7 +62,7 @@ d3.tsv("../data/demo.tsv", function(error, data) {
         data: data,
         height: 600,
         width: 960,
-        domain: metaData.option1,
+        domain: metaData.option1, //this is the domain for color scale
         domain_colors: ["blue", "red", "green"],
         margin: {
           top: 80,
@@ -89,6 +86,7 @@ d3.tsv("../data/demo.tsv", function(error, data) {
       var svg_xml = (new XMLSerializer).serializeToString(svg);
 });
 
+//re-render the graph according to the color option
 function color_by_option(index){
   var chosenOption = selectList.options[index];
   var domain;
@@ -119,7 +117,7 @@ function color_by_option(index){
       data: data,
       height: 600,
       width: 960,
-      domain: domain,
+      domain: domain, //this is the domain for color scale
       domain_colors: ["blue", "red", "green"],
       margin: {
         top: 80,

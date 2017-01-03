@@ -2,12 +2,12 @@
 var app = require("biojs-vis-pca");
 
 //metaData contains different options
-var metaData = {"option1": ["Republican", "Democrat"], "option2": ["a", "b", "c"], "option3": ["x", "y", "z"]};
+var metaData = {"option1": ["a", "b"], "option2": ["a", "b", "c"], "option3": ["x", "y", "z"]};
 
 //set default values for color domain, xDomain, yDomain and colorOption
 var colorDomain = metaData.option1;
-var xDomain = "component1";
-var yDomain = "component2";
+var xDomain = "PC1";
+var yDomain = "PC2";
 var colorOption = "option1";
 
 var body = document.getElementsByTagName("body")[0];
@@ -39,7 +39,8 @@ for (var i = 0; i < colorOptions.length; i++) {
 }
 
 //create array of components options
-var componentOptions = ["component1", "component2"];
+var componentOptions = ["PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10","PC11","PC12","PC13","PC13","PC15","PC16","PC17","PC18",
+                        "PC19","PC20","PC21","PC22","PC23","PC24","PC25","PC26","PC27","PC28","PC29","PC30","PC31","PC32","PC33","PC34","PC35","PC36",];
 
 //Need 2 select lists, one for x axis, one for y axis
 //Create and append select list for x axis component options
@@ -94,28 +95,28 @@ var tooltip = d3.tip()
     .attr("class", "d3-tip")
     .offset([0, +110])
     .html(function(d){
-        state = d.state;
-        component1 = d.component1;
-        component2 = d.component2;
-        temp = "state: " + state + "<br/>" +
+        gene = d.gene;
+        component1 = d[xDomain];
+        component2 = d[yDomain];
+        temp = "gene: " + gene + "<br/>" +
                component1 + ", " + component2
         return temp;
     });
 
 // render the default graph, use option1 as domain
-d3.tsv("../data/demo.tsv", function(error, data) {
+d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
-        d.component1 = +d.component1;
-        d.component2 = +d.component2;
+        d.PC1 = +d.PC1;
+        d.PC2 = +d.PC2;
       });
 
       target = rootDiv;
       var options = {
         colorOption: colorOption,
-        xDomain: "component1",
-        yDomain: "component2",
+        xDomain: "PC1",
+        yDomain: "PC2",
         metaData: metaData,
-        circle_radius: 8,
+        circle_radius: 3,
         data: data,
         height: 600,
         width: 960,
@@ -164,10 +165,10 @@ function color_by_option(index){
     }
   }
   // each time the option is changed, we need to read the file and redener the svg again.
-  d3.tsv("../data/demo.tsv", function(error, data) {
+  d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
     data.forEach(function(d) {
-      d.component1 = +d.component1;
-      d.component2 = +d.component2;
+      d[xDomain] = +d[xDomain];
+      d[yDomain] = +d[yDomain];
     });
 
     target = rootDiv;
@@ -210,29 +211,33 @@ function choose_components(xIndex, yIndex){
   var yChosenOption = yComponentSelectList.options[yIndex];
 
   if (xChosenOption.selected === true) {
+    xDomain = xChosenOption.id;
+    /*
     if (xChosenOption.id === "component1") {
       xDomain = "component1";
     } else {
       if (xChosenOption.id === "component2") {
         xDomain = "component2";
       }
-    }
+    }*/
   }
 
   if (yChosenOption.selected === true) {
+    yDomain = yChosenOption.id;
+    /*
     if (yChosenOption.id === "component1") {
       yDomain = "component1";
     } else {
       if (yChosenOption.id === "component2") {
         yDomain = "component2";
       }
-    }
+    }*/
   }
   // each time the option is changed, we need to read the file and redener the svg again.
-  d3.tsv("../data/demo.tsv", function(error, data) {
+  d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
     data.forEach(function(d) {
-      d.component1 = +d.component1;
-      d.component2 = +d.component2;
+      d[xDomain] = +d[xDomain];
+      d[yDomain] = +d[yDomain];
     });
 
     target = rootDiv;

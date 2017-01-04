@@ -9,6 +9,10 @@ var colorDomain = metaData.option1;
 var xDomain = "PC1";
 var yDomain = "PC2";
 var colorOption = "option1";
+var chosenComponent1 = "PC1";
+var chosenComponent2 = "PC2";
+
+var barChartData;
 
 var body = document.getElementsByTagName("body")[0];
 
@@ -103,6 +107,18 @@ var tooltip = d3.tip()
         return temp;
     });
 
+d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
+
+      data.forEach(function(d) {
+            //d.prcomp = +d.prcomp;
+          d.eigenvalue = +d.eigenvalue;
+      });
+
+      barChartData = data;
+});
+
+
+
 // render the default graph, use option1 as domain
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
@@ -111,21 +127,24 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
       });
 
       target = rootDiv;
-      var options = {
+      options = {
+        barChartData: barChartData,
+        barChartHeight:900,
+        barChartWidth: 1200,
         colorOption: colorOption,
         xDomain: "PC1",
         yDomain: "PC2",
         metaData: metaData,
-        circle_radius: 3,
+        circle_radius: 8,
         data: data,
-        height: 600,
+        height: 500,
         width: 960,
         colorDomain: metaData.option1, //this is the domain for color scale
         domain_colors: ["blue", "red", "green"],
         margin: {
-          top: 80,
+          top: 10,
           right: 20,
-          bottom: 30,
+          bottom: 10,
           left: 40
         },
         target: target,
@@ -133,6 +152,9 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         x_axis_title: "Principal Component #1",
         y_axis_title: "Principal Component #2",
       };
+
+
+
 
       var instance = new app(options);
 
@@ -173,20 +195,23 @@ function color_by_option(index){
 
     target = rootDiv;
     var options = {
+      barChartData: barChartData,
+      barChartHeight:900,
+      barChartWidth: 1200,
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,
       metaData: metaData,
       circle_radius: 8,
       data: data,
-      height: 600,
+      height: 500,
       width: 960,
       colorDomain: colorDomain, //this is the domain for color scale
       domain_colors: ["blue", "red", "green"],
       margin: {
-        top: 80,
+        top: 10,
         right: 20,
-        bottom: 30,
+        bottom: 10,
         left: 40
       },
       target: target,
@@ -194,6 +219,7 @@ function color_by_option(index){
       x_axis_title: xDomain,
       y_axis_title: yDomain,
     };
+
 
     var instance = new app(options);
 
@@ -242,20 +268,23 @@ function choose_components(xIndex, yIndex){
 
     target = rootDiv;
     var options = {
+      barChartData: barChartData,
+      barChartHeight:900,
+      barChartWidth: 1200,
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,
       metaData: metaData,
       circle_radius: 8,
       data: data,
-      height: 600,
+      height: 500,
       width: 960,
       colorDomain: colorDomain, //this is the domain for color scale
       domain_colors: ["blue", "red", "green"],
       margin: {
-        top: 80,
+        top: 10,
         right: 20,
-        bottom: 30,
+        bottom: 10,
         left: 40
       },
       target: target,
@@ -263,6 +292,7 @@ function choose_components(xIndex, yIndex){
       x_axis_title: xDomain,
       y_axis_title: yDomain,
     };
+
 
     var instance = new app(options);
 

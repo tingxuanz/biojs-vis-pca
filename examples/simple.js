@@ -11,8 +11,12 @@ var yDomain = "PC2";
 var colorOption = "option1";
 
 
-var barChartData;
+var barChartData = [];
+var scatterPlotData = [];
 var numberOfComponents = 5;
+
+var numOfClickedBars = 0;
+var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
 
@@ -42,6 +46,9 @@ for (var i = 0; i < colorOptions.length; i++) {
     colorSelectList.appendChild(option);
 }
 
+
+
+/*
 //create array of components options
 var componentOptions = ["PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10","PC11","PC12","PC13","PC13","PC15","PC16","PC17","PC18",
                         "PC19","PC20","PC21","PC22","PC23","PC24","PC25","PC26","PC27","PC28","PC29","PC30","PC31","PC32","PC33","PC34","PC35","PC36",];
@@ -90,7 +97,7 @@ for (var i = 0; i < componentOptions.length; i++) {
 
     yComponentSelectList.appendChild(option);
 }
-
+*/
 
 
 
@@ -107,18 +114,99 @@ var tooltip = d3.tip()
         return temp;
     });
 
-d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
+  d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
 
-      data.forEach(function(d) {
-            //d.prcomp = +d.prcomp;
-          d.eigenvalue = +d.eigenvalue;
-      });
+          data.forEach(function(d) {
+                //d.prcomp = +d.prcomp;
+              d.eigenvalue = +d.eigenvalue;
+          });
 
-      barChartData = data;
+          barChartData = data;
+  });
+
+d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data){
+  data.forEach(function(d) {
+    d.PC1 = +d.PC1;
+    d.PC2 = +d.PC2;
+    d.PC3 = +d.PC3;
+    d.PC4 = +d.PC4;
+    d.PC5 = +d.PC5;
+    d.PC6 = +d.PC6;
+    d.PC7 = +d.PC7;
+    d.PC8 = +d.PC8;
+    d.PC9 = +d.PC9;
+    d.PC10 = +d.PC10;
+    d.PC11 = +d.PC11;
+    d.PC12 = +d.PC12;
+    d.PC13 = +d.PC13;
+    d.PC14 = +d.PC14;
+    d.PC15 = +d.PC15;
+    d.PC16 = +d.PC16;
+    d.PC17 = +d.PC17;
+    d.PC18 = +d.PC18;
+    d.PC19 = +d.PC19;
+    d.PC20 = +d.PC20;
+    d.PC21 = +d.PC21;
+    d.PC22 = +d.PC22;
+    d.PC23 = +d.PC23;
+    d.PC24 = +d.PC24;
+    d.PC25 = +d.PC25;
+    d.PC26 = +d.PC26;
+    d.PC27 = +d.PC27;
+    d.PC28 = +d.PC28;
+    d.PC29 = +d.PC29;
+    d.PC30 = +d.PC30;
+    d.PC31 = +d.PC31;
+    d.PC32 = +d.PC32;
+    d.PC33 = +d.PC33;
+    d.PC34 = +d.PC34;
+    d.PC35 = +d.PC35;
+    d.PC36 = +d.PC36;
+  });
+  scatterPlotData = data;
 });
 
+var target = rootDiv;
+var options = {
+  clickedBars: clickedBarId,
+  numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
+  //barChartData: barChartData,
+  barChartHeight:900,
+  barChartWidth: numberOfComponents * 30,
+  colorOption: colorOption,
+  xDomain: "PC1",
+  yDomain: "PC2",
+  metaData: metaData,
+  circle_radius: 8,
+  //data: scatterPlotData,
+  height: 500,
+  width: 960,
+  colorDomain: metaData.option1, //this is the domain for color scale
+  domain_colors: ["blue", "red", "green"],
+  margin: {
+    top: 10,
+    right: 20,
+    bottom: 10,
+    left: 40
+  },
+  target: target,
+  tooltip: tooltip,
+  x_axis_title: "Principal Component #1",
+  y_axis_title: "Principal Component #2",
+};
+options.barChartData = barChartData;
+options.data = scatterPlotData;
 
+var instance = new app(options);
 
+// Get the d3js SVG element
+var tmp = document.getElementById(rootDiv.id);
+var svg = tmp.getElementsByTagName("svg")[0];
+
+// Extract the data as SVG text string
+var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+/*
 // render the default graph, use option1 as color domain
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
@@ -128,6 +216,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       target = rootDiv;
       var options = {
+        clickedBars: clickedBarId,
         numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
         barChartData: barChartData,
         barChartHeight:900,
@@ -165,7 +254,66 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       // Extract the data as SVG text string
       var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+      var bars = d3.selectAll(".bar")
+                  .on("click",function(d,i){
+                      var clicked = this.getAttribute("clicked");
+                      var id = this.getAttribute("id");
+
+                      if (numOfClickedBars < 2) {
+                        if (clicked === "false") {
+                          d3.select(this)
+                          .attr("clicked", "true")
+                          .attr("fill", "red");
+                          numOfClickedBars = numOfClickedBars + 1;
+                          clickedBarId.push(id);
+                          console.log(numOfClickedBars);
+                          console.log(clickedBarId);
+                        }
+
+                        if (numOfClickedBars === 2) {
+                          choose_components();
+                        }
+                      } else {
+                        alert("Two components are chosen, please reset")
+                      }
+                  });
+       var resetButton = document.createElement("button");
+       resetButton.innerHTML = "reset";
+       resetButton.onclick = function() {
+         numOfClickedBars = 0;
+         clickedBarId = [];
+         var bars = d3.selectAll(".bar")
+                     .attr("clicked", "false")
+                     .attr("fill", "steelblue")
+                     .on("click",function(d,i){
+                         var clicked = this.getAttribute("clicked");
+                         var id = this.getAttribute("id");
+
+                         if (numOfClickedBars < 2) {
+                           if (clicked === "false") {
+                             d3.select(this)
+                             .attr("clicked", "true")
+                             .attr("fill", "red");
+                             numOfClickedBars = numOfClickedBars + 1;
+                             clickedBarId.push(id);
+                             console.log(numOfClickedBars);
+                             console.log(clickedBarId);
+                           }
+
+                           if (numOfClickedBars === 2) {
+                             choose_components();
+                           }
+                         } else {
+                           alert("Two components are chosen, please reset")
+                         }
+                     });
+       };
+       body.appendChild(resetButton);
+
 });
+*/
+
 
 //re-render the graph according to the color option
 function color_by_option(index){
@@ -196,6 +344,7 @@ function color_by_option(index){
 
     target = rootDiv;
     var options = {
+      clickedBars: clickedBarId,
       numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
       barChartHeight:900,
@@ -231,36 +380,23 @@ function color_by_option(index){
 
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+
   });
 }
 
-function choose_components(xIndex, yIndex){
-  var xChosenOption = xComponentSelectList.options[xIndex];
-  var yChosenOption = yComponentSelectList.options[yIndex];
-
+function choose_components(){
+  var xDomain = clickedBarId[0];
+  var yDomain = clickedBarId[1];
+  /*
   if (xChosenOption.selected === true) {
     xDomain = xChosenOption.id;
-    /*
-    if (xChosenOption.id === "component1") {
-      xDomain = "component1";
-    } else {
-      if (xChosenOption.id === "component2") {
-        xDomain = "component2";
-      }
-    }*/
   }
 
   if (yChosenOption.selected === true) {
     yDomain = yChosenOption.id;
-    /*
-    if (yChosenOption.id === "component1") {
-      yDomain = "component1";
-    } else {
-      if (yChosenOption.id === "component2") {
-        yDomain = "component2";
-      }
-    }*/
   }
+  */
   // each time the option is changed, we need to read the file and redener the svg again.
   d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
     data.forEach(function(d) {
@@ -270,6 +406,7 @@ function choose_components(xIndex, yIndex){
 
     target = rootDiv;
     var options = {
+      clickedBars: clickedBarId,
       numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
       barChartHeight:900,

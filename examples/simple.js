@@ -9,10 +9,10 @@ var colorDomain = metaData.option1;
 var xDomain = "PC1";
 var yDomain = "PC2";
 var colorOption = "option1";
-var chosenComponent1 = "PC1";
-var chosenComponent2 = "PC2";
+
 
 var barChartData;
+var numberOfComponents = 5;
 
 var body = document.getElementsByTagName("body")[0];
 
@@ -119,7 +119,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_varian
 
 
 
-// render the default graph, use option1 as domain
+// render the default graph, use option1 as color domain
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
         d.PC1 = +d.PC1;
@@ -127,10 +127,11 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
       });
 
       target = rootDiv;
-      options = {
+      var options = {
+        numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
         barChartData: barChartData,
         barChartHeight:900,
-        barChartWidth: 1200,
+        barChartWidth: numberOfComponents * 30,
         colorOption: colorOption,
         xDomain: "PC1",
         yDomain: "PC2",
@@ -195,9 +196,10 @@ function color_by_option(index){
 
     target = rootDiv;
     var options = {
+      numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
       barChartHeight:900,
-      barChartWidth: 1200,
+      barChartWidth: numberOfComponents * 30,
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,
@@ -268,9 +270,10 @@ function choose_components(xIndex, yIndex){
 
     target = rootDiv;
     var options = {
+      numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
       barChartHeight:900,
-      barChartWidth: 1200,
+      barChartWidth: numberOfComponents * 30,
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,

@@ -9,16 +9,23 @@ var colors = ["DarkOrchid", "Orange", "DodgerBlue", "Blue","BlueViolet","Brown",
 
 //set default values for color domain, xDomain, yDomain and colorOption
 var colorDomain = colorBy.SampleType;
-var xDomain = "PC1";
-var yDomain = "PC2";
+var xDomain = "PC1"; //xDomain is used to setup the domain for x axis and circle's cx attribute in scatter_plot
+var yDomain = "PC2"; //yDomain is used to setup the domain for y axis and circle's cy attribute in scatter_plot
 var colorOption = "SampleType";
 
+//store the data for bar chart
 var barChartData;
+
+//store the metadata which is used to decide how the points are colored
 var metaDataForSampleId;
 
+// number of components that will be displayed in bar chart
 var numberOfComponents = 5;
 
+//number of bars that are clicked
 var numOfClickedBars = 0;
+
+//store the clicked bars' ids
 var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
@@ -49,13 +56,24 @@ for (var i = 0; i < colorOptions.length; i++) {
     colorSelectList.appendChild(option);
 }
 
+//create and append the reset button
+
 var resetButton = document.createElement("button");
 resetButton.innerHTML = "Reset";
+
+/*
+when click the reset button, first reset the variables, then re-draw the graph.
+*/
 resetButton.onclick = function(){
   numOfClickedBars = 0;
-
-  choose_components();
   clickedBarId = [];
+  xDomain = "PC1";
+  yDomain = "PC2";
+  colorOption = "SampleType";
+  colorDomain = colorBy.SampleType;
+  default_graph();
+  colorSelectList.options[0].selected = true; //reset the select list
+
 };
 body.appendChild(resetButton);
 
@@ -74,6 +92,7 @@ var tooltip = d3.tip()
         return temp;
     });
 
+//load the bar chart data
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
     data.forEach(function(d) {
       d.eigenvalue = +d.eigenvalue;
@@ -81,12 +100,14 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_varian
     barChartData = data;
 });
 
+//load the metadara for color options
 d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     metaDataForSampleId = data;
 });
 
-
-// render the default graph, use option1 as color domain
+default_graph();
+// render the default graph, use SampleType as color domain
+function default_graph(){
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
         d.PC1 = +d.PC1;
@@ -108,7 +129,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         height: 500,
         width: 960,
         colorDomain: colorBy.SampleType, //this is the domain for color scale
-        domain_colors: colors,
+        domain_colors: colors, //this is the colors used to for different color options
         margin: {
           top: 10,
           right: 20,
@@ -117,8 +138,8 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         },
         target: target,
         tooltip: tooltip,
-        x_axis_title: "Principal Component #1",
-        y_axis_title: "Principal Component #2",
+        x_axis_title: "PC1",
+        y_axis_title: "PC2",
       };
 
       //merge each SampleID's metadata to its raw data
@@ -152,12 +173,10 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
                         if (numOfClickedBars === 2) {
                           choose_components();
                         }
-                      } else {
-                        alert("Two components are chosen, please reset")
                       }
                   });
 });
-
+}
 //re-render the graph according to the color option
 function color_by_option(index){
   var chosenOption = colorSelectList.options[index];
@@ -238,26 +257,17 @@ function color_by_option(index){
                       if (numOfClickedBars === 2) {
                         choose_components();
                       }
-                    } else {
-                      alert("Two components are chosen, please reset")
                     }
                 });
 
   });
 }
 
+//re-render the graph according to the chosen components
 function choose_components(){
    xDomain = clickedBarId[0];
    yDomain = clickedBarId[1];
-  /*
-  if (xChosenOption.selected === true) {
-    xDomain = xChosenOption.id;
-  }
 
-  if (yChosenOption.selected === true) {
-    yDomain = yChosenOption.id;
-  }
-  */
   // each time the option is changed, we need to read the file and redener the svg again.
   d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
     data.forEach(function(d) {
@@ -306,25 +316,11 @@ function choose_components(){
 
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
+
     var bars = d3.selectAll(".bar")
                 .on("click",function(d,i){
-                    var clicked = this.getAttribute("clicked");
-                    var id = this.getAttribute("id");
-
-                    if (numOfClickedBars < 2) {
-                      if (clicked === "false") {
-                        d3.select(this)
-                        .attr("clicked", "true")
-                        .attr("fill", "red");
-                        numOfClickedBars = numOfClickedBars + 1;
-                        clickedBarId.push(id);
-                      }
-
-                      if (numOfClickedBars === 2) {
-                        choose_components();
-                      }
-                    } else {
-                      alert("Two components are chosen, please reset")
+                    if (numOfClickedBars >= 2) {
+                      alert("Two components have been chosen, please reset")
                     }
                 });
   });

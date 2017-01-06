@@ -1,18 +1,21 @@
 // if you don't specify a html file, the sniper will generate a div with id "rootDiv"
 var app = require("biojs-vis-pca");
 
-//metaData contains different options
-var metaData = {"option1": ["a", "b"], "option2": ["a", "b", "c"], "option3": ["x", "y", "z"]};
+//colorBy contains different color options
+var colorBy = {SampleType: ["0", "Day1", "Day2","Day3", "Day4", "Day5", "Day6", "Day7", "ESRP KD", "CTRL", "RBM47 KD"], ExperimentalSeries: ["PRJNA304414", "PRJNA304419", "PRJNA304418"]};
+
+var colors = ["DarkOrchid", "Orange", "DodgerBlue", "Blue","BlueViolet","Brown", "Deeppink", "BurlyWood","CadetBlue",
+"Chartreuse","Chocolate","Coral","CornflowerBlue","Crimson","Cyan", "Red", "DarkBlue"];
 
 //set default values for color domain, xDomain, yDomain and colorOption
-var colorDomain = metaData.option1;
+var colorDomain = colorBy.SampleType;
 var xDomain = "PC1";
 var yDomain = "PC2";
-var colorOption = "option1";
+var colorOption = "SampleType";
 
+var barChartData;
+var metaDataForSampleId;
 
-var barChartData = [];
-var scatterPlotData = [];
 var numberOfComponents = 5;
 
 var numOfClickedBars = 0;
@@ -21,7 +24,7 @@ var clickedBarId = [];
 var body = document.getElementsByTagName("body")[0];
 
 //Create array of color options to be added
-var colorOptions = ["option1", "option2", "option3"];
+var colorOptions = ["SampleType", "ExperimentalSeries"];
 
 //Create and append select list for color options
 var colorSelectList = document.createElement("select");
@@ -46,58 +49,15 @@ for (var i = 0; i < colorOptions.length; i++) {
     colorSelectList.appendChild(option);
 }
 
+var resetButton = document.createElement("button");
+resetButton.innerHTML = "Reset";
+resetButton.onclick = function(){
+  numOfClickedBars = 0;
 
-
-/*
-//create array of components options
-var componentOptions = ["PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10","PC11","PC12","PC13","PC13","PC15","PC16","PC17","PC18",
-                        "PC19","PC20","PC21","PC22","PC23","PC24","PC25","PC26","PC27","PC28","PC29","PC30","PC31","PC32","PC33","PC34","PC35","PC36",];
-
-//Need 2 select lists, one for x axis, one for y axis
-//Create and append select list for x axis component options
-var xComponentSelectList = document.createElement("select");
-xComponentSelectList.id = "xComponentSelect";
-xComponentSelectList.onchange = function(){
-  if (typeof(this.selectedIndex) != 'undefined')
-    {
-      choose_components(this.selectedIndex, yComponentSelectList.selectedIndex);
-    }
+  choose_components();
+  clickedBarId = [];
 };
-body.appendChild(xComponentSelectList);
-for (var i = 0; i < componentOptions.length; i++) {
-    var option = document.createElement("option");
-    option.value = componentOptions[i];
-    option.text = componentOptions[i];
-    option.id = componentOptions[i];
-    if (i === 0) {
-      option.defaultSelected = true;
-    }
-
-    xComponentSelectList.appendChild(option);
-}
-
-//Create and append select list for y axis component options
-var yComponentSelectList = document.createElement("select");
-yComponentSelectList.id = "yComponentSelect";
-yComponentSelectList.onchange = function(){
-  if (typeof(this.selectedIndex) != 'undefined')
-    {
-      choose_components(xComponentSelectList.selectedIndex, this.selectedIndex);
-    }
-};
-body.appendChild(yComponentSelectList);
-for (var i = 0; i < componentOptions.length; i++) {
-    var option = document.createElement("option");
-    option.value = componentOptions[i];
-    option.text = componentOptions[i];
-    option.id = componentOptions[i];
-    if (i === 1) {
-      option.defaultSelected = true;
-    }
-
-    yComponentSelectList.appendChild(option);
-}
-*/
+body.appendChild(resetButton);
 
 
 
@@ -106,107 +66,26 @@ var tooltip = d3.tip()
     .attr("class", "d3-tip")
     .offset([0, +110])
     .html(function(d){
-        gene = d.gene;
+        sampleID = d.SampleID;
         component1 = d[xDomain];
         component2 = d[yDomain];
-        temp = "gene: " + gene + "<br/>" +
+        temp = "SampleID: " + sampleID + "<br/>" +
                component1 + ", " + component2
         return temp;
     });
 
-  d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
-
-          data.forEach(function(d) {
-                //d.prcomp = +d.prcomp;
-              d.eigenvalue = +d.eigenvalue;
-          });
-
-          barChartData = data;
-  });
-
-d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data){
-  data.forEach(function(d) {
-    d.PC1 = +d.PC1;
-    d.PC2 = +d.PC2;
-    d.PC3 = +d.PC3;
-    d.PC4 = +d.PC4;
-    d.PC5 = +d.PC5;
-    d.PC6 = +d.PC6;
-    d.PC7 = +d.PC7;
-    d.PC8 = +d.PC8;
-    d.PC9 = +d.PC9;
-    d.PC10 = +d.PC10;
-    d.PC11 = +d.PC11;
-    d.PC12 = +d.PC12;
-    d.PC13 = +d.PC13;
-    d.PC14 = +d.PC14;
-    d.PC15 = +d.PC15;
-    d.PC16 = +d.PC16;
-    d.PC17 = +d.PC17;
-    d.PC18 = +d.PC18;
-    d.PC19 = +d.PC19;
-    d.PC20 = +d.PC20;
-    d.PC21 = +d.PC21;
-    d.PC22 = +d.PC22;
-    d.PC23 = +d.PC23;
-    d.PC24 = +d.PC24;
-    d.PC25 = +d.PC25;
-    d.PC26 = +d.PC26;
-    d.PC27 = +d.PC27;
-    d.PC28 = +d.PC28;
-    d.PC29 = +d.PC29;
-    d.PC30 = +d.PC30;
-    d.PC31 = +d.PC31;
-    d.PC32 = +d.PC32;
-    d.PC33 = +d.PC33;
-    d.PC34 = +d.PC34;
-    d.PC35 = +d.PC35;
-    d.PC36 = +d.PC36;
-  });
-  scatterPlotData = data;
+d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
+    data.forEach(function(d) {
+      d.eigenvalue = +d.eigenvalue;
+    });
+    barChartData = data;
 });
 
-var target = rootDiv;
-var options = {
-  clickedBars: clickedBarId,
-  numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
-  //barChartData: barChartData,
-  barChartHeight:900,
-  barChartWidth: numberOfComponents * 30,
-  colorOption: colorOption,
-  xDomain: "PC1",
-  yDomain: "PC2",
-  metaData: metaData,
-  circle_radius: 8,
-  //data: scatterPlotData,
-  height: 500,
-  width: 960,
-  colorDomain: metaData.option1, //this is the domain for color scale
-  domain_colors: ["blue", "red", "green"],
-  margin: {
-    top: 10,
-    right: 20,
-    bottom: 10,
-    left: 40
-  },
-  target: target,
-  tooltip: tooltip,
-  x_axis_title: "Principal Component #1",
-  y_axis_title: "Principal Component #2",
-};
-options.barChartData = barChartData;
-options.data = scatterPlotData;
+d3.tsv("../data/6932_metadata.tsv", function(error, data) {
+    metaDataForSampleId = data;
+});
 
-var instance = new app(options);
 
-// Get the d3js SVG element
-var tmp = document.getElementById(rootDiv.id);
-var svg = tmp.getElementsByTagName("svg")[0];
-
-// Extract the data as SVG text string
-var svg_xml = (new XMLSerializer).serializeToString(svg);
-
-/*
 // render the default graph, use option1 as color domain
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
@@ -224,13 +103,12 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         colorOption: colorOption,
         xDomain: "PC1",
         yDomain: "PC2",
-        metaData: metaData,
         circle_radius: 8,
         data: data,
         height: 500,
         width: 960,
-        colorDomain: metaData.option1, //this is the domain for color scale
-        domain_colors: ["blue", "red", "green"],
+        colorDomain: colorBy.SampleType, //this is the domain for color scale
+        domain_colors: colors,
         margin: {
           top: 10,
           right: 20,
@@ -243,8 +121,10 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         y_axis_title: "Principal Component #2",
       };
 
-
-
+      //merge each SampleID's metadata to its raw data
+       for (var i = 0; i < data.length; i++) {
+         jQuery.extend(options.data[i],metaDataForSampleId[i]);
+       }
 
       var instance = new app(options);
 
@@ -267,8 +147,6 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
                           .attr("fill", "red");
                           numOfClickedBars = numOfClickedBars + 1;
                           clickedBarId.push(id);
-                          console.log(numOfClickedBars);
-                          console.log(clickedBarId);
                         }
 
                         if (numOfClickedBars === 2) {
@@ -278,61 +156,21 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
                         alert("Two components are chosen, please reset")
                       }
                   });
-       var resetButton = document.createElement("button");
-       resetButton.innerHTML = "reset";
-       resetButton.onclick = function() {
-         numOfClickedBars = 0;
-         clickedBarId = [];
-         var bars = d3.selectAll(".bar")
-                     .attr("clicked", "false")
-                     .attr("fill", "steelblue")
-                     .on("click",function(d,i){
-                         var clicked = this.getAttribute("clicked");
-                         var id = this.getAttribute("id");
-
-                         if (numOfClickedBars < 2) {
-                           if (clicked === "false") {
-                             d3.select(this)
-                             .attr("clicked", "true")
-                             .attr("fill", "red");
-                             numOfClickedBars = numOfClickedBars + 1;
-                             clickedBarId.push(id);
-                             console.log(numOfClickedBars);
-                             console.log(clickedBarId);
-                           }
-
-                           if (numOfClickedBars === 2) {
-                             choose_components();
-                           }
-                         } else {
-                           alert("Two components are chosen, please reset")
-                         }
-                     });
-       };
-       body.appendChild(resetButton);
-
 });
-*/
-
 
 //re-render the graph according to the color option
 function color_by_option(index){
   var chosenOption = colorSelectList.options[index];
 
   if (chosenOption.selected === true) {
-    if (chosenOption.id === "option1") {
-      colorDomain = metaData.option1;
-      colorOption = "option1";
-    } else {
-      if (chosenOption.id === "option2") {
-        colorDomain = metaData.option2;
-        colorOption = "option2";
-      } else {
-        if (chosenOption.id === "option3") {
-          colorDomain = metaData.option3;
-          colorOption = "option3";
-        }
-      }
+    if (chosenOption.id === "SampleType") {
+      colorDomain = colorBy.SampleType;
+      colorOption = "SampleType";
+    }
+
+    if (chosenOption.id === "ExperimentalSeries") {
+      colorDomain = colorBy.ExperimentalSeries;
+      colorOption = "ExperimentalSeries";
     }
   }
   // each time the option is changed, we need to read the file and redener the svg again.
@@ -352,13 +190,12 @@ function color_by_option(index){
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,
-      metaData: metaData,
       circle_radius: 8,
       data: data,
       height: 500,
       width: 960,
       colorDomain: colorDomain, //this is the domain for color scale
-      domain_colors: ["blue", "red", "green"],
+      domain_colors: colors,
       margin: {
         top: 10,
         right: 20,
@@ -371,6 +208,9 @@ function color_by_option(index){
       y_axis_title: yDomain,
     };
 
+    for (var i = 0; i < data.length; i++) {
+      jQuery.extend(options.data[i],metaDataForSampleId[i]);
+    }
 
     var instance = new app(options);
 
@@ -381,13 +221,34 @@ function color_by_option(index){
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
 
+    var bars = d3.selectAll(".bar")
+                .on("click",function(d,i){
+                    var clicked = this.getAttribute("clicked");
+                    var id = this.getAttribute("id");
+
+                    if (numOfClickedBars < 2) {
+                      if (clicked === "false") {
+                        d3.select(this)
+                        .attr("clicked", "true")
+                        .attr("fill", "red");
+                        numOfClickedBars = numOfClickedBars + 1;
+                        clickedBarId.push(id);
+                      }
+
+                      if (numOfClickedBars === 2) {
+                        choose_components();
+                      }
+                    } else {
+                      alert("Two components are chosen, please reset")
+                    }
+                });
 
   });
 }
 
 function choose_components(){
-  var xDomain = clickedBarId[0];
-  var yDomain = clickedBarId[1];
+   xDomain = clickedBarId[0];
+   yDomain = clickedBarId[1];
   /*
   if (xChosenOption.selected === true) {
     xDomain = xChosenOption.id;
@@ -414,13 +275,12 @@ function choose_components(){
       colorOption: colorOption,
       xDomain: xDomain,
       yDomain: yDomain,
-      metaData: metaData,
       circle_radius: 8,
       data: data,
       height: 500,
       width: 960,
       colorDomain: colorDomain, //this is the domain for color scale
-      domain_colors: ["blue", "red", "green"],
+      domain_colors: colors,
       margin: {
         top: 10,
         right: 20,
@@ -433,6 +293,10 @@ function choose_components(){
       y_axis_title: yDomain,
     };
 
+    for (var i = 0; i < data.length; i++) {
+      jQuery.extend(options.data[i],metaDataForSampleId[i]);
+    }
+
 
     var instance = new app(options);
 
@@ -442,5 +306,26 @@ function choose_components(){
 
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
+    var bars = d3.selectAll(".bar")
+                .on("click",function(d,i){
+                    var clicked = this.getAttribute("clicked");
+                    var id = this.getAttribute("id");
+
+                    if (numOfClickedBars < 2) {
+                      if (clicked === "false") {
+                        d3.select(this)
+                        .attr("clicked", "true")
+                        .attr("fill", "red");
+                        numOfClickedBars = numOfClickedBars + 1;
+                        clickedBarId.push(id);
+                      }
+
+                      if (numOfClickedBars === 2) {
+                        choose_components();
+                      }
+                    } else {
+                      alert("Two components are chosen, please reset")
+                    }
+                });
   });
 }

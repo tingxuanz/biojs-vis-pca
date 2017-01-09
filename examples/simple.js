@@ -1,23 +1,20 @@
 // if you don't specify a html file, the sniper will generate a div with id "rootDiv"
 var app = require("biojs-vis-pca");
 
-//colorBy contains different color options
-var colorBy = {SampleType: ["0", "Day1", "Day2","Day3", "Day4", "Day5", "Day6", "Day7", "ESRP KD", "CTRL", "RBM47 KD"], ExperimentalSeries: ["PRJNA304414", "PRJNA304419", "PRJNA304418"]};
 
-var colors = ["DarkOrchid", "Orange", "DodgerBlue", "Blue","BlueViolet","Brown", "Deeppink", "BurlyWood","CadetBlue",
-"Chartreuse","Chocolate","Coral","CornflowerBlue","Crimson","Cyan", "Red", "DarkBlue"];
 
-//set default values for color domain, xDomain, yDomain and colorOption
-var colorDomain = colorBy.SampleType;
+//Create array of color options to be added
+var colorOptions = [];
+var colorOption;
+//set default values for xDomain, yDomain
 var xDomain = "PC1"; //xDomain is used to setup the domain for x axis and circle's cx attribute in scatter_plot
 var yDomain = "PC2"; //yDomain is used to setup the domain for y axis and circle's cy attribute in scatter_plot
-var colorOption = "SampleType";
 
 //store the data for bar chart
 var barChartData;
 
 //store the metadata which is used to decide how the points are colored
-var metaDataForSampleId;
+var metadata;
 
 // number of components that will be displayed in bar chart
 var numberOfComponents = 5;
@@ -30,9 +27,6 @@ var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
 
-//Create array of color options to be added
-var colorOptions = ["SampleType", "ExperimentalSeries"];
-
 //Create and append select list for color options
 var colorSelectList = document.createElement("select");
 colorSelectList.id = "colorSelect";
@@ -43,21 +37,30 @@ colorSelectList.onchange = function(){if (typeof(this.selectedIndex) != 'undefin
 };
 body.appendChild(colorSelectList);
 
-//Create and append the color options
-for (var i = 0; i < colorOptions.length; i++) {
-    var option = document.createElement("option");
-    option.value = colorOptions[i];
-    option.text = colorOptions[i];
-    option.id = colorOptions[i];
-    if (i === 0) {
-      option.defaultSelected = true;
+//load the metadata for color options
+d3.tsv("../data/6932_metadata.tsv", function(error, data) {
+    metadata = data;
+    colorOptions = Object.keys(data[0]);
+    colorOptions.shift(colorOptions[0]); //first element in colorOptions is SampleID, we need to remove it
+
+    //Create and append the color options
+    for (var i = 0; i < colorOptions.length; i++) {
+        var option = document.createElement("option");
+        option.value = colorOptions[i];
+        option.text = colorOptions[i];
+        option.id = colorOptions[i];
+        if (i === 0) {
+          option.defaultSelected = true;
+        }
+
+        colorSelectList.appendChild(option);
     }
 
-    colorSelectList.appendChild(option);
-}
+    //set the default color option
+    colorOption = colorOptions[0];
+});
 
 //create and append the reset button
-
 var resetButton = document.createElement("button");
 resetButton.innerHTML = "Reset";
 
@@ -69,17 +72,15 @@ resetButton.onclick = function(){
   clickedBarId = [];
   xDomain = "PC1";
   yDomain = "PC2";
-  colorOption = "SampleType";
-  colorDomain = colorBy.SampleType;
+  colorOption = colorOptions[0];
+  //colorDomain = colorBy.SampleType;
   default_graph();
   colorSelectList.options[0].selected = true; //reset the select list
 
 };
 body.appendChild(resetButton);
 
-
-
-
+// create the tooltip for points in scatter plot
 var tooltip = d3.tip()
     .attr("class", "d3-tip")
     .offset([0, +110])
@@ -100,12 +101,8 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_varian
     barChartData = data;
 });
 
-//load the metadara for color options
-d3.tsv("../data/6932_metadata.tsv", function(error, data) {
-    metaDataForSampleId = data;
-});
-
 default_graph();
+
 // render the default graph, use SampleType as color domain
 function default_graph(){
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
@@ -116,6 +113,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       target = rootDiv;
       var options = {
+        metadata: metadata,
         clickedBars: clickedBarId,
         numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
         barChartData: barChartData,
@@ -126,10 +124,10 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         yDomain: "PC2",
         circle_radius: 8,
         data: data,
-        height: 500,
-        width: 960,
-        colorDomain: colorBy.SampleType, //this is the domain for color scale
-        domain_colors: colors, //this is the colors used to for different color options
+        height: 500, // height for scatter plot
+        width: 960,  //width for scatter plot
+        fullWidth: 1300, //width for the whole graph
+        fullHeight: 930, //height for the whole graph
         margin: {
           top: 10,
           right: 20,
@@ -144,7 +142,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       //merge each SampleID's metadata to its raw data
        for (var i = 0; i < data.length; i++) {
-         jQuery.extend(options.data[i],metaDataForSampleId[i]);
+         jQuery.extend(options.data[i],options.metadata[i]);
        }
 
       var instance = new app(options);
@@ -156,25 +154,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
       // Extract the data as SVG text string
       var svg_xml = (new XMLSerializer).serializeToString(svg);
 
-      var bars = d3.selectAll(".bar")
-                  .on("click",function(d,i){
-                      var clicked = this.getAttribute("clicked");
-                      var id = this.getAttribute("id");
-
-                      if (numOfClickedBars < 2) {
-                        if (clicked === "false") {
-                          d3.select(this)
-                          .attr("clicked", "true")
-                          .attr("fill", "red");
-                          numOfClickedBars = numOfClickedBars + 1;
-                          clickedBarId.push(id);
-                        }
-
-                        if (numOfClickedBars === 2) {
-                          choose_components();
-                        }
-                      }
-                  });
+      clickBar();
 });
 }
 //re-render the graph according to the color option
@@ -182,14 +162,10 @@ function color_by_option(index){
   var chosenOption = colorSelectList.options[index];
 
   if (chosenOption.selected === true) {
-    if (chosenOption.id === "SampleType") {
-      colorDomain = colorBy.SampleType;
-      colorOption = "SampleType";
-    }
-
-    if (chosenOption.id === "ExperimentalSeries") {
-      colorDomain = colorBy.ExperimentalSeries;
-      colorOption = "ExperimentalSeries";
+    for (var i = 0; i < colorOptions.length; i++) {
+      if (chosenOption.id === colorOptions[i]) {
+        colorOption = colorOptions[i];
+      }
     }
   }
   // each time the option is changed, we need to read the file and redener the svg again.
@@ -211,10 +187,10 @@ function color_by_option(index){
       yDomain: yDomain,
       circle_radius: 8,
       data: data,
-      height: 500,
-      width: 960,
-      colorDomain: colorDomain, //this is the domain for color scale
-      domain_colors: colors,
+      height: 500, // height for scatter plot
+      width: 960,  //width for scatter plot
+      fullWidth: 1300, //width for the whole graph
+      fullHeight: 930, //height for the whole graph
       margin: {
         top: 10,
         right: 20,
@@ -228,7 +204,7 @@ function color_by_option(index){
     };
 
     for (var i = 0; i < data.length; i++) {
-      jQuery.extend(options.data[i],metaDataForSampleId[i]);
+      jQuery.extend(options.data[i],metadata[i]);
     }
 
     var instance = new app(options);
@@ -239,27 +215,7 @@ function color_by_option(index){
 
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
-
-    var bars = d3.selectAll(".bar")
-                .on("click",function(d,i){
-                    var clicked = this.getAttribute("clicked");
-                    var id = this.getAttribute("id");
-
-                    if (numOfClickedBars < 2) {
-                      if (clicked === "false") {
-                        d3.select(this)
-                        .attr("clicked", "true")
-                        .attr("fill", "red");
-                        numOfClickedBars = numOfClickedBars + 1;
-                        clickedBarId.push(id);
-                      }
-
-                      if (numOfClickedBars === 2) {
-                        choose_components();
-                      }
-                    }
-                });
-
+    clickBar();
   });
 }
 
@@ -287,10 +243,10 @@ function choose_components(){
       yDomain: yDomain,
       circle_radius: 8,
       data: data,
-      height: 500,
-      width: 960,
-      colorDomain: colorDomain, //this is the domain for color scale
-      domain_colors: colors,
+      height: 500, // height for scatter plot
+      width: 960,  //width for scatter plot
+      fullWidth: 1300, //width for the whole graph
+      fullHeight: 930, //height for the whole graph
       margin: {
         top: 10,
         right: 20,
@@ -304,7 +260,7 @@ function choose_components(){
     };
 
     for (var i = 0; i < data.length; i++) {
-      jQuery.extend(options.data[i],metaDataForSampleId[i]);
+      jQuery.extend(options.data[i],metadata[i]);
     }
 
 
@@ -316,7 +272,6 @@ function choose_components(){
 
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString(svg);
-
     var bars = d3.selectAll(".bar")
                 .on("click",function(d,i){
                     if (numOfClickedBars >= 2) {
@@ -324,4 +279,26 @@ function choose_components(){
                     }
                 });
   });
+}
+
+function clickBar(){
+  var bars = d3.selectAll(".bar")
+              .on("click",function(d,i){
+                  var clicked = this.getAttribute("clicked");
+                  var id = this.getAttribute("id");
+
+                  if (numOfClickedBars < 2) {
+                    if (clicked === "false") {
+                      d3.select(this)
+                      .attr("clicked", "true")
+                      .attr("fill", "red");
+                      numOfClickedBars = numOfClickedBars + 1;
+                      clickedBarId.push(id);
+                    }
+
+                    if (numOfClickedBars === 2) {
+                      choose_components();
+                    }
+                  }
+              });
 }

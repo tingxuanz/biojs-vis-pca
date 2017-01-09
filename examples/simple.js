@@ -117,7 +117,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         clickedBars: clickedBarId,
         numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
         barChartData: barChartData,
-        barChartHeight:900,
+        barChartHeight:500,
         barChartWidth: numberOfComponents * 30,
         colorOption: colorOption,
         xDomain: "PC1",
@@ -126,7 +126,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         data: data,
         height: 500, // height for scatter plot
         width: 960,  //width for scatter plot
-        fullWidth: 1300, //width for the whole graph
+        fullWidth: 1400, //width for the whole graph
         fullHeight: 930, //height for the whole graph
         margin: {
           top: 10,

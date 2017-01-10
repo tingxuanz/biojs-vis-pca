@@ -3,9 +3,12 @@ var app = require("biojs-vis-pca");
 
 
 
-//Create array of color options to be added
-var colorOptions = [];
-var colorOption;
+//Create array which will contain all groupby options such as SampleType
+var groupByOptions = [];
+
+// This is the groupby option that will be used to render the scatter plot
+var groupByoption;
+
 //set default values for xDomain, yDomain
 var xDomain = "PC1"; //xDomain is used to setup the domain for x axis and circle's cx attribute in scatter_plot
 var yDomain = "PC2"; //yDomain is used to setup the domain for y axis and circle's cy attribute in scatter_plot
@@ -13,10 +16,10 @@ var yDomain = "PC2"; //yDomain is used to setup the domain for y axis and circle
 //store the data for bar chart
 var barChartData;
 
-//store the metadata which is used to decide how the points are colored
+//store the metadata about how all points are grouped
 var metadata;
 
-// number of components that will be displayed in bar chart
+// number of principle components that will be displayed in bar chart
 var numberOfComponents = 5;
 
 //number of bars that are clicked
@@ -27,37 +30,41 @@ var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
 
-//Create and append select list for color options
-var colorSelectList = document.createElement("select");
-colorSelectList.id = "colorSelect";
-colorSelectList.onchange = function(){if (typeof(this.selectedIndex) != 'undefined')
+//Create a select list for groupby options
+var groupBySelectList = document.createElement("select");
+groupBySelectList.id = "colorSelect";
+groupBySelectList.onchange = function(){if (typeof(this.selectedIndex) != 'undefined')
                                 {
                                   color_by_option(this.selectedIndex);
                                 }
 };
-body.appendChild(colorSelectList);
+body.appendChild(groupBySelectList); // append the select list to body
 
-//load the metadata for color options
+//load the metadata for groupby options
 d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     metadata = data;
-    colorOptions = Object.keys(data[0]);
-    colorOptions.shift(colorOptions[0]); //first element in colorOptions is SampleID, we need to remove it
 
-    //Create and append the color options
-    for (var i = 0; i < colorOptions.length; i++) {
+    /*metadata is an array of objects. Each object in this array has same keys (eg. SampleType).
+      We only want the keys as groupByOptions*/
+    groupByOptions = Object.keys(metadata[0]);
+
+    //first element in groupByOptions is SampleID, we need to remove it
+    groupByOptions.shift(groupByOptions[0]);
+
+    /*In order to allow usedrs to choose different groupByOptions,
+    we need to creaet option elements in the select list for each groupByoption.
+    */
+    for (var i = 0; i < groupByOptions.length; i++) {
         var option = document.createElement("option");
-        option.value = colorOptions[i];
-        option.text = colorOptions[i];
-        option.id = colorOptions[i];
+        option.text = groupByOptions[i];
         if (i === 0) {
-          option.defaultSelected = true;
+          option.defaultSelected = true; // set the first option element as default option
         }
-
-        colorSelectList.appendChild(option);
+        groupBySelectList.appendChild(option); // append the option element to the select list
     }
 
-    //set the default color option
-    colorOption = colorOptions[0];
+    //set the default groupByoption
+    groupByoption = groupByOptions[0];
 });
 
 //create and append the reset button
@@ -72,10 +79,10 @@ resetButton.onclick = function(){
   clickedBarId = [];
   xDomain = "PC1";
   yDomain = "PC2";
-  colorOption = colorOptions[0];
+  groupByoption = groupByOptions[0];
   //colorDomain = colorBy.SampleType;
   default_graph();
-  colorSelectList.options[0].selected = true; //reset the select list
+  groupBySelectList.options[0].selected = true; //reset the select list
 
 };
 body.appendChild(resetButton);
@@ -119,7 +126,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         barChartData: barChartData,
         barChartHeight:900,
         barChartWidth: numberOfComponents * 30,
-        colorOption: colorOption,
+        groupByoption: groupByoption,
         xDomain: "PC1",
         yDomain: "PC2",
         circle_radius: 8,
@@ -159,12 +166,12 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 }
 //re-render the graph according to the color option
 function color_by_option(index){
-  var chosenOption = colorSelectList.options[index];
+  var chosenOption = groupBySelectList.options[index];
 
   if (chosenOption.selected === true) {
-    for (var i = 0; i < colorOptions.length; i++) {
-      if (chosenOption.id === colorOptions[i]) {
-        colorOption = colorOptions[i];
+    for (var i = 0; i < groupByOptions.length; i++) {
+      if (chosenOption.text === groupByOptions[i]) {
+        groupByoption = groupByOptions[i];
       }
     }
   }
@@ -182,7 +189,7 @@ function color_by_option(index){
       barChartData: barChartData,
       barChartHeight:900,
       barChartWidth: numberOfComponents * 30,
-      colorOption: colorOption,
+      groupByoption: groupByoption,
       xDomain: xDomain,
       yDomain: yDomain,
       circle_radius: 8,
@@ -238,7 +245,7 @@ function choose_components(){
       barChartData: barChartData,
       barChartHeight:900,
       barChartWidth: numberOfComponents * 30,
-      colorOption: colorOption,
+      groupByoption: groupByoption,
       xDomain: xDomain,
       yDomain: yDomain,
       circle_radius: 8,
@@ -275,7 +282,7 @@ function choose_components(){
     var bars = d3.selectAll(".bar")
                 .on("click",function(d,i){
                     if (numOfClickedBars >= 2) {
-                      alert("Two components have been chosen, please reset")
+                      alert("Two components have been chosen, please reset");
                     }
                 });
   });
@@ -295,10 +302,15 @@ function clickBar(){
                       numOfClickedBars = numOfClickedBars + 1;
                       clickedBarId.push(id);
                     }
-
+                    /*
                     if (numOfClickedBars === 2) {
                       choose_components();
                     }
+                    */
                   }
+                  if (numOfClickedBars === 2) {
+                    choose_components();
+                  }
+
               });
 }

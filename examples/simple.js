@@ -48,8 +48,13 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
       We only want the keys as groupByOptions*/
     groupByOptions = Object.keys(metadata[0]);
 
-    //first element in groupByOptions is SampleID, we need to remove it
-    groupByOptions.shift(groupByOptions[0]);
+    //We would like to remove SampleID, ReadFile1 and ReadFile2 from groupByOptions, because they won't be used as groupby options.
+    var index1 = groupByOptions.indexOf("SampleID");
+    groupByOptions.splice(index1,1);
+    var index2 = groupByOptions.indexOf("ReadFile1");
+    groupByOptions.splice(index2,1);
+    var index3 = groupByOptions.indexOf("ReadFile2");
+    groupByOptions.splice(index3,1);
 
     /*In order to allow usedrs to choose different groupByOptions,
     we need to creaet option elements in the select list for each groupByoption.

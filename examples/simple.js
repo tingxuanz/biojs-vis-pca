@@ -6,6 +6,8 @@ var app = require("biojs-vis-pca");
 //Create array which will contain all groupby options such as SampleType
 var groupByOptions = [];
 
+
+
 // This is the groupby option that will be used to render the scatter plot
 var groupByoption;
 
@@ -44,17 +46,26 @@ body.appendChild(groupBySelectList); // append the select list to body
 d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     metadata = data;
 
-    /*metadata is an array of objects. Each object in this array has same keys (eg. SampleType).
-      We only want the keys as groupByOptions*/
+
+    /*
+    For the tsv file, we expect rows as sample ids
+    and columns as group by options
+    (except for 1st one which is sample id and
+    columns with name ReadFile1 & ReadFile2 which are irrelevant to group by options)
+    */
+    /*
+    After load the file, all data are stored in metadata.
+    metadata is an array of objects. All bojects use same column names (eg. SampleType) as keys.
+    We want to get these keys as groupByOptions.
+    */
     groupByOptions = Object.keys(metadata[0]);
 
     //We would like to remove SampleID, ReadFile1 and ReadFile2 from groupByOptions, because they won't be used as groupby options.
-    var index1 = groupByOptions.indexOf("SampleID");
-    groupByOptions.splice(index1,1);
-    var index2 = groupByOptions.indexOf("ReadFile1");
-    groupByOptions.splice(index2,1);
-    var index3 = groupByOptions.indexOf("ReadFile2");
-    groupByOptions.splice(index3,1);
+    var itemsToBeRemoved = ["SampleID", "ReadFile1", "ReadFile2"];
+    for (var i = 0; i < itemsToBeRemoved.length; i++) {
+      var index = groupByOptions.indexOf(itemsToBeRemoved[i]); //find index of target item in groupByOptions
+      groupByOptions.splice(index, 1);
+    }
 
     /*In order to allow usedrs to choose different groupByOptions,
     we need to creaet option elements in the select list for each groupByoption.
@@ -129,7 +140,7 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         clickedBars: clickedBarId,
         numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
         barChartData: barChartData,
-        barChartHeight:900,
+        barChartHeight:480,
         barChartWidth: numberOfComponents * 30,
         groupByoption: groupByoption,
         xDomain: "PC1",
@@ -138,12 +149,12 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         data: data,
         height: 500, // height for scatter plot
         width: 960,  //width for scatter plot
-        fullWidth: 1300, //width for the whole graph
-        fullHeight: 930, //height for the whole graph
+        fullWidth: 1000, //width for the whole graph
+        fullHeight: 1000, //height for the whole graph
         margin: {
           top: 10,
-          right: 20,
-          bottom: 10,
+          right: 40,
+          bottom: 30,
           left: 40
         },
         target: target,
@@ -161,11 +172,11 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       // Get the d3js SVG element
       var tmp = document.getElementById(rootDiv.id);
-      var svg = tmp.getElementsByTagName("svg")[0];
-
+      var svgForPCA = tmp.getElementsByTagName("svg")[0];
+      var svgForBar = tmp.getElementsByTagName("svg")[1];
       // Extract the data as SVG text string
-      var svg_xml = (new XMLSerializer).serializeToString(svg);
-
+      var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
+      var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
       clickBar();
 });
 }
@@ -192,7 +203,7 @@ function color_by_option(index){
       clickedBars: clickedBarId,
       numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
-      barChartHeight:900,
+      barChartHeight:480,
       barChartWidth: numberOfComponents * 30,
       groupByoption: groupByoption,
       xDomain: xDomain,
@@ -201,12 +212,12 @@ function color_by_option(index){
       data: data,
       height: 500, // height for scatter plot
       width: 960,  //width for scatter plot
-      fullWidth: 1300, //width for the whole graph
-      fullHeight: 930, //height for the whole graph
+      fullWidth: 1000, //width for the whole graph
+      fullHeight: 1000, //height for the whole graph
       margin: {
         top: 10,
-        right: 20,
-        bottom: 10,
+        right: 40,
+        bottom: 30,
         left: 40
       },
       target: target,
@@ -223,10 +234,11 @@ function color_by_option(index){
 
     // Get the d3js SVG element
     var tmp = document.getElementById(rootDiv.id);
-    var svg = tmp.getElementsByTagName("svg")[0];
-
+    var svgForPCA = tmp.getElementsByTagName("svg")[0];
+    var svgForBar = tmp.getElementsByTagName("svg")[1];
     // Extract the data as SVG text string
-    var svg_xml = (new XMLSerializer).serializeToString(svg);
+    var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
+    var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
     clickBar();
   });
 }
@@ -248,7 +260,7 @@ function choose_components(){
       clickedBars: clickedBarId,
       numberOfComponents: numberOfComponents,  //used to determine how many components will be showed in the bar chart
       barChartData: barChartData,
-      barChartHeight:900,
+      barChartHeight:480,
       barChartWidth: numberOfComponents * 30,
       groupByoption: groupByoption,
       xDomain: xDomain,
@@ -257,12 +269,12 @@ function choose_components(){
       data: data,
       height: 500, // height for scatter plot
       width: 960,  //width for scatter plot
-      fullWidth: 1300, //width for the whole graph
-      fullHeight: 930, //height for the whole graph
+      fullWidth: 1000, //width for the whole graph
+      fullHeight: 1000, //height for the whole graph
       margin: {
         top: 10,
-        right: 20,
-        bottom: 10,
+        right: 40,
+        bottom: 30,
         left: 40
       },
       target: target,
@@ -280,10 +292,12 @@ function choose_components(){
 
     // Get the d3js SVG element
     var tmp = document.getElementById(rootDiv.id);
-    var svg = tmp.getElementsByTagName("svg")[0];
-
+    var svgForPCA = tmp.getElementsByTagName("svg")[0];
+    var svgForBar = tmp.getElementsByTagName("svg")[1];
     // Extract the data as SVG text string
-    var svg_xml = (new XMLSerializer).serializeToString(svg);
+    var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
+    var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
+
     var bars = d3.selectAll(".bar")
                 .on("click",function(d,i){
                     if (numOfClickedBars >= 2) {
@@ -307,11 +321,6 @@ function clickBar(){
                       numOfClickedBars = numOfClickedBars + 1;
                       clickedBarId.push(id);
                     }
-                    /*
-                    if (numOfClickedBars === 2) {
-                      choose_components();
-                    }
-                    */
                   }
                   if (numOfClickedBars === 2) {
                     choose_components();

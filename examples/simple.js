@@ -6,6 +6,8 @@ var app = require("biojs-vis-pca");
 //Create array which will contain all groupby options such as SampleType
 var groupByOptions = [];
 
+
+
 // This is the groupby option that will be used to render the scatter plot
 var groupByoption;
 
@@ -59,19 +61,10 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     groupByOptions = Object.keys(metadata[0]);
 
     //We would like to remove SampleID, ReadFile1 and ReadFile2 from groupByOptions, because they won't be used as groupby options.
-    for (var i = 0; i < groupByOptions.length; i++) {
-      if (groupByOptions[i] === "SampleID") {
-        var index = i;
-        groupByOptions.splice(index,1);
-      }
-      if (groupByOptions[i] === "ReadFile1") {
-        var index = i;
-        groupByOptions.splice(index,1);
-      }
-      if (groupByOptions[i] === "ReadFile2") {
-        var index = i;
-        groupByOptions.splice(index,1);
-      }
+    var itemsToBeRemoved = ["SampleID", "ReadFile1", "ReadFile2"];
+    for (var i = 0; i < itemsToBeRemoved.length; i++) {
+      var index = groupByOptions.indexOf(itemsToBeRemoved[i]); //find index of target item in groupByOptions
+      groupByOptions.splice(index, 1);
     }
 
     /*In order to allow usedrs to choose different groupByOptions,

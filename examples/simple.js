@@ -179,11 +179,11 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
       // Get the d3js SVG element
       var tmp = document.getElementById(rootDiv.id);
-      var svg = tmp.getElementsByTagName("svg")[0];
-
+      var svgForScatter = tmp.getElementsByTagName("svg")[0];
+      var svgForBar = tmp.getElementsByTagName("svg")[1];
       // Extract the data as SVG text string
-      var svg_xml = (new XMLSerializer).serializeToString(svg);
-
+      var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForScatter);
+      var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
       clickBar();
 });
 }
@@ -241,10 +241,11 @@ function color_by_option(index){
 
     // Get the d3js SVG element
     var tmp = document.getElementById(rootDiv.id);
-    var svg = tmp.getElementsByTagName("svg")[0];
-
+    var svgForScatter = tmp.getElementsByTagName("svg")[0];
+    var svgForBar = tmp.getElementsByTagName("svg")[1];
     // Extract the data as SVG text string
-    var svg_xml = (new XMLSerializer).serializeToString(svg);
+    var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForScatter);
+    var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
     clickBar();
   });
 }
@@ -298,10 +299,12 @@ function choose_components(){
 
     // Get the d3js SVG element
     var tmp = document.getElementById(rootDiv.id);
-    var svg = tmp.getElementsByTagName("svg")[0];
-
+    var svgForScatter = tmp.getElementsByTagName("svg")[0];
+    var svgForBar = tmp.getElementsByTagName("svg")[1];
     // Extract the data as SVG text string
-    var svg_xml = (new XMLSerializer).serializeToString(svg);
+    var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForScatter);
+    var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
+
     var bars = d3.selectAll(".bar")
                 .on("click",function(d,i){
                     if (numOfClickedBars >= 2) {
@@ -325,11 +328,6 @@ function clickBar(){
                       numOfClickedBars = numOfClickedBars + 1;
                       clickedBarId.push(id);
                     }
-                    /*
-                    if (numOfClickedBars === 2) {
-                      choose_components();
-                    }
-                    */
                   }
                   if (numOfClickedBars === 2) {
                     choose_components();

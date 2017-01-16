@@ -44,6 +44,7 @@ body.appendChild(groupBySelectList); // append the select list to body
 d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     metadata = data;
 
+
     /*
     For the tsv file, we expect rows as sample ids
     and columns as group by options
@@ -57,14 +58,21 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     */
     groupByOptions = Object.keys(metadata[0]);
 
-    /*We would like to remove SampleID, ReadFile1 and ReadFile2 from groupByOptions,
-      since they won't be used as groupby options.*/
-    var index1 = groupByOptions.indexOf("SampleID");
-    groupByOptions.splice(index1,1);
-    var index2 = groupByOptions.indexOf("ReadFile1");
-    groupByOptions.splice(index2,1);
-    var index3 = groupByOptions.indexOf("ReadFile2");
-    groupByOptions.splice(index3,1);
+    //We would like to remove SampleID, ReadFile1 and ReadFile2 from groupByOptions, because they won't be used as groupby options.
+    for (var i = 0; i < groupByOptions.length; i++) {
+      if (groupByOptions[i] === "SampleID") {
+        var index = i;
+        groupByOptions.splice(index,1);
+      }
+      if (groupByOptions[i] === "ReadFile1") {
+        var index = i;
+        groupByOptions.splice(index,1);
+      }
+      if (groupByOptions[i] === "ReadFile2") {
+        var index = i;
+        groupByOptions.splice(index,1);
+      }
+    }
 
     /*In order to allow usedrs to choose different groupByOptions,
     we need to creaet option elements in the select list for each groupByoption.

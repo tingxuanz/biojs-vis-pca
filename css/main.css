@@ -25,18 +25,15 @@ body {
 }
 
 .dot {
-  stroke: gray;
+  stroke: black;
 }
+
 .brush {
   stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
 }
 
-.selected {
-  stroke: black;
-  stroke-width: 2px;
-}
 
 .brushButton {
   visibility: visible;

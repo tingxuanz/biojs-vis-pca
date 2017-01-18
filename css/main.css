@@ -25,5 +25,16 @@ body {
 }
 
 .dot {
-  stroke: #000;
+  stroke: black;
+}
+
+.brush {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+
+.brushButton {
+  visibility: visible;
 }

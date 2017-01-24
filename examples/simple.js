@@ -1,6 +1,7 @@
 // if you don't specify a html file, the sniper will generate a div with id "rootDiv"
 var app = require("biojs-vis-pca");
 
+
 //Create array which will contain all groupby options such as SampleType
 var groupByOptions = [];
 
@@ -59,7 +60,7 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     }
 
     /*In order to allow users to choose different groupByOptions,
-    we need to creaet radio button elements in the form for each groupByoption.
+    we need to create radio button elements in the form for each groupByoption.
     */
 
     for (var i = 0; i < groupByOptions.length; i++) {
@@ -138,11 +139,13 @@ default_graph();
 function default_graph(){
 d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
       data.forEach(function(d) {
-        d.PC1 = +d.PC1;
+        /*d.PC1 = +d.PC1;
         d.PC2 = +d.PC2;
         d.PC3 = +d.PC3;
         d.PC4 = +d.PC4;
-        d.PC5 = +d.PC5;
+        d.PC5 = +d.PC5;*/
+        d[xDomain] = +d[xDomain];
+        d[yDomain] = +d[yDomain];
       });
 
       target = rootDiv;
@@ -181,12 +184,14 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         y_axis_title: "PC2",
       };
 
+
       //merge each SampleID's metadata to its raw data
        for (var i = 0; i < data.length; i++) {
          jQuery.extend(options.data[i],options.metadata[i]);
        }
 
       var instance = new app(options);
+
 
       // Get the d3js SVG element
       var tmp = document.getElementById(rootDiv.id);
@@ -196,5 +201,53 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
       var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
       var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
 
+      //get the settings of graph
+      var graph = init(options);
+      
+      change_color(graph);
+      click_bar_to_choose_PCA(graph);
+
+
 });
+}
+
+function change_color(graph){
+  d3.select("#colorSelect")
+    .on("change", function(){
+      // update the groupByoption
+      var groupBySelectList = document.getElementById("colorSelect");
+      for (var i = 0; i < groupBySelectList.childNodes.length; i++) {
+        if (groupBySelectList.childNodes[i].checked === true) {
+          options.groupByoption = groupBySelectList.childNodes[i].id;
+        }
+      }
+      //change the color of scatter points
+      change_scatter_color(graph);
+
+      // the legend needs to be updated
+      d3.selectAll(".legend").remove();
+      setup_legend(graph);
+    });
+}
+
+function click_bar_to_choose_PCA(graph){
+  d3.selectAll(".bar")
+    .on("click",function(){
+        var clicked = this.getAttribute("clicked");
+        var id = this.getAttribute("id");
+
+        if (options.numOfClickedBars < 2) {
+          if (clicked === "false") {
+            d3.select(this)
+            .attr("clicked", "true")
+            .attr("fill", "red");
+            options.numOfClickedBars = options.numOfClickedBars + 1;
+            options.clickedBars.push(id);
+          }
+
+          if(options.numOfClickedBars === 2){
+            update_PCA(graph);
+          }
+        }
+  });
 }

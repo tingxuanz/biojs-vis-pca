@@ -28,10 +28,11 @@ var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
 
-//Create a select list for groupby options
-var groupBySelectList = document.createElement("select");
+
+//Create a form for groupby options
+var groupBySelectList = document.createElement("form");
 groupBySelectList.id = "colorSelect";
-body.appendChild(groupBySelectList); // append the select list to body
+body.appendChild(groupBySelectList);
 
 //load the metadata for groupby options
 d3.tsv("../data/6932_metadata.tsv", function(error, data) {
@@ -57,16 +58,29 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
       groupByOptions.splice(index, 1);
     }
 
-    /*In order to allow usedrs to choose different groupByOptions,
-    we need to creaet option elements in the select list for each groupByoption.
+    /*In order to allow users to choose different groupByOptions,
+    we need to creaet radio button elements in the form for each groupByoption.
     */
+
     for (var i = 0; i < groupByOptions.length; i++) {
-        var option = document.createElement("option");
-        option.text = groupByOptions[i];
+        var option = document.createElement("input");
+        option.type = "radio";
+        option.name = "color";
+        option.id = groupByOptions[i];
+
+        //A radio button doesn't come with text attribute, we need a label element for the radio button to show some text.
+        var label = document.createElement("label");
+        label.htmlFor = option.id;
+        label.innerHTML = groupByOptions[i];
+
         if (i === 0) {
-          option.defaultSelected = true; // set the first option element as default option
+          option.checked = true; // set the first option element as default option
         }
-        groupBySelectList.appendChild(option); // append the option element to the select list
+        groupBySelectList.appendChild(option);
+        groupBySelectList.appendChild(label);
+
+        var br = document.createElement("br");
+        groupBySelectList.appendChild(br); // append the radio button element and label element to the select list
     }
 
     //set the default groupByoption
@@ -75,6 +89,7 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
 
 //create and append the reset button
 var resetButton = document.createElement("button");
+resetButton.id = "resetButton";
 resetButton.innerHTML = "Reset";
 
 /*
@@ -87,7 +102,7 @@ resetButton.onclick = function(){
   yDomain = "PC2";
   groupByoption = groupByOptions[0];
   default_graph();
-  groupBySelectList.options[0].selected = true; //reset the select list
+  groupBySelectList.childNodes[0].checked = true; //reset the select list
 };
 body.appendChild(resetButton);
 
@@ -140,14 +155,13 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         barChartHeight:500,
         barChartWidth: numberOfComponents * 40,
         groupByoption: groupByoption,
-        allGroupByOptions: groupByOptions,
         xDomain: "PC1",
         yDomain: "PC2",
         circle_radius: 8,
         data: data,
         height: 500, // height for scatter plot
         width: 960,  //width for scatter plot
-        fullWidth: 1500, //width for the whole graph
+        fullWidth: 1360, //width for the whole graph
         fullHeight: 500, //height for the whole graph
         marginForPCA: {
           top: 10,
@@ -181,6 +195,6 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
       // Extract the data as SVG text string
       var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
       var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
-  
+
 });
 }

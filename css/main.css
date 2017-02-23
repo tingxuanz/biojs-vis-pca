@@ -25,5 +25,34 @@ body {
 }
 
 .dot {
-  stroke: #000;
+  stroke: black;
+}
+
+.brush {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+
+.brushButton {
+  visibility: visible;
+}
+
+#colorSelect {
+  position: absolute;
+  left: 1360px;
+  top: 10px;
+}
+
+#resetButton {
+  position: absolute;
+  left: 1360px;
+  top: 90px;
+}
+
+.brushButton {
+  position: absolute;
+  left: 1360px;
+  top: 60px;
 }

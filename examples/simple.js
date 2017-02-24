@@ -29,7 +29,6 @@ var clickedBarId = [];
 
 var body = document.getElementsByTagName("body")[0];
 
-
 //Create a form for groupby options
 var groupBySelectList = document.createElement("form");
 groupBySelectList.id = "colorSelect";
@@ -56,7 +55,10 @@ d3.tsv("../data/6932_metadata.tsv", function(error, data) {
     var itemsToBeRemoved = ["SampleID", "ReadFile1", "ReadFile2"];
     for (var i = 0; i < itemsToBeRemoved.length; i++) {
       var index = groupByOptions.indexOf(itemsToBeRemoved[i]); //find index of target item in groupByOptions
-      groupByOptions.splice(index, 1);
+      if (index !== -1) {
+        groupByOptions.splice(index, 1);
+      }
+
     }
 
     /*In order to allow users to choose different groupByOptions,
@@ -126,7 +128,7 @@ var tooltip = d3.tip()
     });
 
 //load the bar chart data
-d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_variance.6932.tsv", function(error, data) {
+d3.tsv("../data/6932_screetable.tsv", function(error, data) {
     data.forEach(function(d) {
       d.eigenvalue = +d.eigenvalue;
     });
@@ -136,14 +138,10 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_screetable_prcomp_varian
 default_graph();
 
 // render the default graph, use SampleType as color domain
+
 function default_graph(){
-d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", function(error, data) {
+d3.tsv("../data/6932_pca.tsv", function(error, data) {
       data.forEach(function(d) {
-        /*d.PC1 = +d.PC1;
-        d.PC2 = +d.PC2;
-        d.PC3 = +d.PC3;
-        d.PC4 = +d.PC4;
-        d.PC5 = +d.PC5;*/
         d[xDomain] = +d[xDomain];
         d[yDomain] = +d[yDomain];
       });
@@ -163,18 +161,20 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
         circle_radius: 8,
         data: data,
         height: 500, // height for scatter plot
-        width: 960,  //width for scatter plot
+        width: 800,  //width for scatter plot
+        legend_width: 160,
+        legend_height: 500,
         fullWidth: 1360, //width for the whole graph
         fullHeight: 500, //height for the whole graph
         marginForPCA: {
           top: 10,
-          right: 50,
+          right: 20,
           bottom: 30,
           left: 40
         },
         marginForBar: {
           top: 10,
-          right: 10,
+          right: 20,
           bottom: 30,
           left: 50
         },
@@ -194,16 +194,19 @@ d3.tsv("../data/PCA_transcript_expression_TMM_RPKM_log2_sample_data.6932.tsv", f
 
 
       // Get the d3js SVG element
-      var tmp = document.getElementById(rootDiv.id);
+      var tmp = document.getElementsByTagName("body")[0];
       var svgForPCA = tmp.getElementsByTagName("svg")[0];
-      var svgForBar = tmp.getElementsByTagName("svg")[1];
+      var svgForLegend = tmp.getElementsByTagName("svg")[1];
+      var svgForBar = tmp.getElementsByTagName("svg")[2];
+
       // Extract the data as SVG text string
       var svgForScatter_xml = (new XMLSerializer).serializeToString(svgForPCA);
+      var svgForLegend_xml = (new XMLSerializer).serializeToString(svgForLegend);
       var svgForBar_xml = (new XMLSerializer).serializeToString(svgForBar);
 
       //get the settings of graph
       var graph = init(options);
-      
+
       change_color(graph);
       click_bar_to_choose_PCA(graph);
 

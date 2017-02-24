@@ -48,11 +48,15 @@ body {
 #resetButton {
   position: absolute;
   left: 1360px;
-  top: 90px;
+  top: 175px;
 }
 
 .brushButton {
   position: absolute;
   left: 1360px;
-  top: 60px;
+  top: 150px;
+}
+
+.divForLegend {
+  overflow: scroll;
 }
